@@ -4,8 +4,8 @@ const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const db = require('./db')
 
-const ACCESS_TOKEN_SECRET = "sdfsdsd4flkjdsflkdsj"
-const ID_TOKEN_SECRET = "fdkjjlpadfglfd6kyeu"
+const ACCESS_TOKEN_SECRET = "eieiza"
+const ID_TOKEN_SECRET = "hahaplus"
 const NAME_MIN_LENGTH = 4
 const NAME_MAX_LENGTH = 20
 const USERNAME_MIN_LENGTH = 4
