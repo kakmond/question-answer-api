@@ -4,7 +4,7 @@ const db = new sqlite3.Database("database.db")
 db.run("PRAGMA foreign_keys = ON")
 
 db.run(`
-	CREATE TABLE IF NOT EXISTS posts (
+	CREATE TABLE IF NOT EXISTS questions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		accountId INTEGER,
         title TEXT,
@@ -93,34 +93,34 @@ exports.deleteAccountById = function (id, callback) {
     })
 }
 
-exports.getAllPosts = function (callback) {
-    const query = `SELECT * FROM posts ORDER BY createdAt`
+exports.getAllQuestions = function (callback) {
+    const query = `SELECT * FROM questions ORDER BY createdAt`
     const values = []
-    db.all(query, values, function (error, posts) {
-        callback(error, posts)
+    db.all(query, values, function (error, questions) {
+        callback(error, questions)
     })
 }
 
-exports.getPostById = function (id, callback) {
-    const query = `SELECT * FROM posts WHERE id = ?`
+exports.getQuestionById = function (id, callback) {
+    const query = `SELECT * FROM questions WHERE id = ?`
     const values = [id]
-    db.get(query, values, function (error, post) {
-        callback(error, post)
+    db.get(query, values, function (error, question) {
+        callback(error, question)
     })
 }
 
-exports.createPost = function (post, callback) {
+exports.createQuestion = function (question, callback) {
     const query = `
-        INSERT INTO posts 
+        INSERT INTO questions 
             (accountId, title, description, createdAt) 
         VALUES 
             (?, ?, ?, ?)
     `
     const values = [
-        post.accountId,
-        post.title,
-        post.description,
-        post.createdAt
+        question.accountId,
+        question.title,
+        question.description,
+        question.createdAt
     ]
     db.run(query, values, function (error) {
         const id = this.lastID
@@ -128,31 +128,31 @@ exports.createPost = function (post, callback) {
     })
 }
 
-exports.updatePostById = function (id, updatedPost, callback) {
+exports.updateQuestionById = function (id, updatedquestion, callback) {
     const query = `
-		UPDATE posts SET
+		UPDATE questions SET
             title = ?,
             description = ?
 		WHERE
 			id = ?
 	`
     const values = [
-        updatedPost.title,
-        updatedPost.description,
+        updatedquestion.title,
+        updatedquestion.description,
         id
     ]
 
     db.run(query, values, function (error) {
-        const postExisted = (this.changes == 1)
-        callback(error, postExisted)
+        const questionExisted = (this.changes == 1)
+        callback(error, questionExisted)
     })
 }
 
-exports.deletePostById = function (id, callback) {
-    const query = `DELETE FROM posts WHERE id = ?`
+exports.deleteQuestionById = function (id, callback) {
+    const query = `DELETE FROM questions WHERE id = ?`
     const values = [id]
     db.run(query, values, function (error) {
-        const postExisted = (this.changes == 1)
-        callback(error, postExisted)
+        const questionExisted = (this.changes == 1)
+        callback(error, questionExisted)
     })
 }

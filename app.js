@@ -161,32 +161,32 @@ app.delete("/accounts/:id", function (req, res) {
     })
 })
 
-app.get("/posts", function (req, res) {
-    db.getAllPosts(function (error, posts) {
+app.get("/questions", function (req, res) {
+    db.getAllQuestions(function (error, questions) {
         if (error) {
             console.log(error)
             res.status(500).end()
         } else
-            res.status(200).json(posts)
+            res.status(200).json(questions)
     })
 })
 
-app.get("/posts/:id", function (req, res) {
+app.get("/questions/:id", function (req, res) {
     const id = req.params.id
-    db.getPostById(id, function (error, post) {
+    db.getQuestionById(id, function (error, question) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
         else
-            if (post)
-                res.status(200).json(post)
+            if (question)
+                res.status(200).json(poquestionst)
             else
                 res.status(404).end()
     })
 })
 
-app.post("/posts", function (req, res) {
+app.post("/questions", function (req, res) {
     const validationErrors = []
     const accountId = req.body.accountId
     const title = req.body.title
@@ -227,14 +227,14 @@ app.post("/posts", function (req, res) {
         return
     }
 
-    const post = {
+    const question = {
         accountId,
         title,
         description,
         createdAt: new Date().getTime()
     }
 
-    db.createPost(post, function (error, id) {
+    db.createQuestion(question, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")
                 res.status(400).json(["accountDoesNotExist"])
@@ -243,13 +243,13 @@ app.post("/posts", function (req, res) {
                 res.status(500).end()
             }
         else {
-            res.setHeader("Location", "/posts/" + id)
+            res.setHeader("Location", "/questions/" + id)
             res.status(201).end()
         }
     })
 })
 
-app.put("/posts/:id", function (req, res) {
+app.put("/questions/:id", function (req, res) {
     const validationErrors = []
     const id = req.params.id
     const title = req.body.title
@@ -266,16 +266,16 @@ app.put("/posts/:id", function (req, res) {
         return
     }
 
-    db.getPostById(id, function (error, oldPost) {
+    db.getQuestionById(id, function (error, oldQuestion) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
         else {
-            if (!oldPost)
+            if (!oldQuestion)
                 res.status(404).end()
             else {
-                if (payload == null || payload.accountId != oldPost.accountId) {
+                if (payload == null || payload.accountId != oldQuestion.accountId) {
                     res.status(401).end()
                     return
                 }
@@ -299,18 +299,18 @@ app.put("/posts/:id", function (req, res) {
                     return
                 }
 
-                const updatePost = {
+                const updateQuestion = {
                     title,
                     description,
                 }
 
-                db.updatePostById(id, updatePost, function (error, postExisted) {
+                db.updateQuestionById(id, updateQuestion, function (error, questionExisted) {
                     if (error) {
                         console.log(error)
                         res.status(500).end()
                     }
                     else
-                        if (!postExisted)
+                        if (!questionExisted)
                             res.status(404).end()
                         else
                             res.status(204).end()
@@ -321,15 +321,15 @@ app.put("/posts/:id", function (req, res) {
 
 })
 
-app.delete("/posts/:id", function (req, res) {
+app.delete("/questions/:id", function (req, res) {
     const id = req.params.id
-    db.deletePostById(id, function (error, postExisted) {
+    db.deleteQuestionById(id, function (error, questionExisted) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
         else
-            if (!postExisted)
+            if (!questionExisted)
                 res.status(404).end()
             else
                 res.status(204).end()
