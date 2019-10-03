@@ -16,6 +16,8 @@ const TITLE_MIN_LENGTH = 5
 const TITLE_MAX_LENGTH = 50
 const DESCRIPTION_MIN_LENGTH = 10
 const DESCRIPTION_MAX_LENGTH = 100
+const ANSWER_MIN_LENGTH = 5
+const ANSWER_MAX_LENGTH = 100
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
@@ -67,25 +69,25 @@ app.post("/accounts", function (req, res) {
     const name = req.body.name
 
     if (!username)
-        validationErrors.push("usernameRequired")
+        validationErrors.push("username is required")
     else if (username.length < USERNAME_MIN_LENGTH)
-        validationErrors.push("usernameTooShort")
+        validationErrors.push("username is too short")
     else if (username.length > USERNAME_MAX_LENGTH)
-        validationErrors.push("usernameTooLong")
+        validationErrors.push("username is too long")
 
     if (!password)
-        validationErrors.push("passwordRequired")
+        validationErrors.push("password is required")
     else if (password.length < PASSWORD_MIN_LENGTH)
-        validationErrors.push("passwordTooShort")
+        validationErrors.push("password is too short")
     else if (password.length > PASSWORD_MAX_LENGTH)
-        validationErrors.push("passwordTooLong")
+        validationErrors.push("password is too Long")
 
     if (!name)
-        validationErrors.push("nameRequired")
+        validationErrors.push("name is required")
     else if (name.length < NAME_MIN_LENGTH)
-        validationErrors.push("nameTooShort")
+        validationErrors.push("name is too short")
     else if (name.length > NAME_MAX_LENGTH)
-        validationErrors.push("nameTooLong")
+        validationErrors.push("name is too long")
 
     if (validationErrors.length > 0) {
         res.status(400).json(validationErrors)
@@ -101,7 +103,7 @@ app.post("/accounts", function (req, res) {
     db.createAccount(account, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: UNIQUE constraint failed: accounts.username")
-                res.status(400).json(["usernameTaken"])
+                res.status(400).json(["username is taken"])
             else {
                 console.log(error)
                 res.status(500).end()
@@ -119,11 +121,11 @@ app.put("/accounts/:id", function (req, res) {
     const name = req.body.name
 
     if (!name)
-        validationErrors.push("nameRequired")
+        validationErrors.push("name is required")
     else if (name.length < NAME_MIN_LENGTH)
-        validationErrors.push("nameTooShort")
+        validationErrors.push("name is too short")
     else if (name.length > NAME_MAX_LENGTH)
-        validationErrors.push("nameTooLong")
+        validationErrors.push("name is too long")
 
     if (validationErrors.length > 0) {
         res.status(400).json(validationErrors)
@@ -180,7 +182,7 @@ app.get("/questions/:id", function (req, res) {
         }
         else
             if (question)
-                res.status(200).json(poquestionst)
+                res.status(200).json(question)
             else
                 res.status(404).end()
     })
@@ -209,18 +211,18 @@ app.post("/questions", function (req, res) {
     }
 
     if (!title)
-        validationErrors.push("titleRequired")
+        validationErrors.push("title is required")
     else if (title.length < TITLE_MIN_LENGTH)
-        validationErrors.push("titleTooShort")
+        validationErrors.push("title is too short")
     else if (title.length > TITLE_MAX_LENGTH)
-        validationErrors.push("titleTooLong")
+        validationErrors.push("title is too long")
 
     if (!description)
-        validationErrors.push("descriptionRequired")
+        validationErrors.push("description is required")
     else if (description.length < DESCRIPTION_MIN_LENGTH)
-        validationErrors.push("descriptionTooShort")
+        validationErrors.push("description is too Short")
     else if (description.length > DESCRIPTION_MAX_LENGTH)
-        validationErrors.push("descriptionTooLong")
+        validationErrors.push("description is too long")
 
     if (validationErrors.length > 0) {
         res.status(400).json(validationErrors)
@@ -237,7 +239,7 @@ app.post("/questions", function (req, res) {
     db.createQuestion(question, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")
-                res.status(400).json(["accountDoesNotExist"])
+                res.status(400).json(["account doesn't exist"])
             else {
                 console.log(error)
                 res.status(500).end()
@@ -281,18 +283,18 @@ app.put("/questions/:id", function (req, res) {
                 }
 
                 if (!title)
-                    validationErrors.push("titleRequired")
+                    validationErrors.push("title is required")
                 else if (title.length < TITLE_MIN_LENGTH)
-                    validationErrors.push("titleTooShort")
+                    validationErrors.push("title is too short")
                 else if (title.length > TITLE_MAX_LENGTH)
-                    validationErrors.push("titleTooLong")
+                    validationErrors.push("title is too long")
 
                 if (!description)
-                    validationErrors.push("descriptionRequired")
+                    validationErrors.push("description is required")
                 if (description.length < DESCRIPTION_MIN_LENGTH)
-                    validationErrors.push("descriptionTooShort")
+                    validationErrors.push("description is too short")
                 else if (description.length > DESCRIPTION_MAX_LENGTH)
-                    validationErrors.push("descriptionTooLong")
+                    validationErrors.push("description is too long")
 
                 if (validationErrors.length > 0) {
                     res.status(400).json(validationErrors)
@@ -337,7 +339,6 @@ app.delete("/questions/:id", function (req, res) {
 })
 
 app.post("/tokens", function (req, res) {
-
     const grant_type = req.body.grant_type
     const username = req.body.username
     const password = req.body.password
@@ -381,5 +382,119 @@ app.post("/tokens", function (req, res) {
 
 })
 
+app.get("/questions/:id/answers", function (req, res) {
+    const id = req.params.id
+    db.getAnswersByQuestionId(id, function (error, answer) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            if (answer)
+                res.status(200).json(answer)
+            else
+                res.status(404).end()
+    })
+})
+
+app.get("/accounts/:id/answers", function (req, res) {
+    const id = req.params.id
+    db.getAnswersByUserId(id, function (error, account) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            if (account) {
+                res.status(200).json(account)
+            } else
+                res.status(404).end()
+    })
+})
+
+// app.get("/answers/:id", function (req, res) {
+//     const id = req.params.id
+//     db.getAnswerById(id, function (error, answer) {
+//         if (error) {
+//             console.log(error)
+//             res.status(500).end()
+//         }
+//         else
+//             if (answer)
+//                 res.status(200).json(answer)
+//             else
+//                 res.status(404).end()
+//     })
+// })
+
+
+app.post("/answers", function (req, res) {
+    const validationErrors = []
+    const questionId = req.body.questionId
+    const accountId = req.body.accountId
+    const description = req.body.description
+    let payload = null
+
+    try {
+        const authorizationHeader = req.get("Authorization")
+        const accessToken = authorizationHeader.substr("Bearer ".length)
+        payload = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+    }
+    catch (e) {
+        res.status(401).end()
+        return
+    }
+
+    if (payload == null || payload.accountId != accountId) {
+        res.status(401).end()
+        return
+    }
+
+    if (!description)
+        validationErrors.push("description is required")
+    else if (description.length < ANSWER_MIN_LENGTH)
+        validationErrors.push("description is too short")
+    else if (description.length > ANSWER_MAX_LENGTH)
+        validationErrors.push("description is too long")
+
+    if (validationErrors.length > 0) {
+        res.status(400).json(validationErrors)
+        return
+    }
+
+    const answer = {
+        accountId,
+        questionId,
+        description,
+        createdAt: new Date().getTime()
+    }
+
+    db.createAnswer(answer, function (error, id) {
+        if (error)
+            if (error.message == "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")
+                res.status(400).json(["account doesn't exist, or question doesn't exist"])
+            else {
+                console.log(error)
+                res.status(500).end()
+            }
+        else
+            res.status(201).end()
+    })
+})
+
+app.delete("/answers/:id", function (req, res) {
+    const id = req.params.id
+    db.deleteQuestionById(id, function (error, answerExisted) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            if (!answerExisted)
+                res.status(404).end()
+            else
+                res.status(204).end()
+    })
+})
 
 app.listen(3000)

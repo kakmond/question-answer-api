@@ -24,6 +24,18 @@ db.run(`
 	)
 `)
 
+db.run(`
+	CREATE TABLE IF NOT EXISTS answers (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+        questionId INTEGER,
+        accountId INTEGER,
+        description TEXT,
+        createdAt INTEGER,
+        FOREIGN KEY (accountId) REFERENCES accounts(id) ON DELETE CASCADE,
+        FOREIGN KEY (questionId) REFERENCES questions(id) ON DELETE CASCADE
+	)
+`)
+
 exports.getAllAccounts = function (callback) {
     const query = `SELECT * FROM accounts ORDER BY id`
     const values = []
@@ -94,7 +106,23 @@ exports.deleteAccountById = function (id, callback) {
 }
 
 exports.getAllQuestions = function (callback) {
-    const query = `SELECT * FROM questions ORDER BY createdAt`
+    const query = `
+    SELECT
+        x.*, u.name
+    FROM (
+        SELECT
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+        FROM
+            questions q
+        LEFT JOIN 
+            answers a ON q.id = a.questionId
+        GROUP BY
+            q.id
+    ) x 
+    LEFT JOIN
+        accounts u ON u.id = x.accountId
+    ORDER BY x.createdAt
+    `
     const values = []
     db.all(query, values, function (error, questions) {
         callback(error, questions)
@@ -102,7 +130,25 @@ exports.getAllQuestions = function (callback) {
 }
 
 exports.getQuestionById = function (id, callback) {
-    const query = `SELECT * FROM questions WHERE id = ?`
+    const query = `
+    SELECT
+        x.*, u.name AS 'author'
+    FROM (
+        SELECT
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+        FROM
+            questions q
+        LEFT JOIN 
+            answers a ON q.id = a.questionId
+        GROUP BY
+            q.id
+    ) x 
+    LEFT JOIN
+        accounts u ON u.id = x.accountId
+    WHERE 
+        x.id = ?
+    ORDER BY x.createdAt
+    `
     const values = [id]
     db.get(query, values, function (error, question) {
         callback(error, question)
@@ -154,5 +200,69 @@ exports.deleteQuestionById = function (id, callback) {
     db.run(query, values, function (error) {
         const questionExisted = (this.changes == 1)
         callback(error, questionExisted)
+    })
+}
+
+exports.createAnswer = function (answer, callback) {
+    const query = `
+        INSERT INTO answers 
+            (questionId, accountId, description, createdAt) 
+        VALUES 
+            (?, ?, ?, ?)
+    `
+    const values = [
+        answer.questionId,
+        answer.accountId,
+        answer.description,
+        answer.createdAt
+    ]
+    db.run(query, values, function (error) {
+        const id = this.lastID
+        callback(error, id)
+    })
+}
+
+exports.getAnswersByQuestionId = function (id, callback) {
+    const query = `
+        SELECT 
+            a.*, u.username, u.name AS 'author', u.id AS 'accountId'
+        FROM 
+            answers a
+        JOIN accounts u ON 
+            a.accountId = u.id
+        WHERE 
+            a.questionId = ?
+        ORDER BY createdAt
+    `
+    const values = [id]
+    db.get(query, values, function (error, question) {
+        callback(error, question)
+    })
+}
+
+exports.getAnswersByUserId = function (id, callback) {
+    const query = `
+        SELECT 
+            a.*, u.username, u.name AS 'author', u.id AS 'accountId'
+        FROM 
+            answers a
+        JOIN accounts u ON 
+            a.accountId = u.id
+        WHERE 
+            a.accountId = ?
+        ORDER BY createdAt
+    `
+    const values = [id]
+    db.get(query, values, function (error, question) {
+        callback(error, question)
+    })
+}
+
+exports.deleteAnswerById = function (id, callback) {
+    const query = `DELETE FROM answers WHERE id = ?`
+    const values = [id]
+    db.run(query, values, function (error) {
+        const answerExisted = (this.changes == 1)
+        callback(error, answerExisted)
     })
 }
