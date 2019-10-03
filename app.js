@@ -376,10 +376,8 @@ app.post("/tokens", function (req, res) {
                 access_token: accessToken,
                 id_token: idToken
             })
-
         }
     })
-
 })
 
 app.get("/questions/:id/answers", function (req, res) {
@@ -390,10 +388,7 @@ app.get("/questions/:id/answers", function (req, res) {
             res.status(500).end()
         }
         else
-            if (answer)
-                res.status(200).json(answer)
-            else
-                res.status(404).end()
+            res.status(200).json(answer)
     })
 })
 
@@ -405,10 +400,7 @@ app.get("/accounts/:id/answers", function (req, res) {
             res.status(500).end()
         }
         else
-            if (account) {
-                res.status(200).json(account)
-            } else
-                res.status(404).end()
+            res.status(200).json(account)
     })
 })
 

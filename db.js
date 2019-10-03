@@ -132,7 +132,7 @@ exports.getAllQuestions = function (callback) {
 exports.getQuestionById = function (id, callback) {
     const query = `
     SELECT
-        x.*, u.name AS 'author'
+        x.*, u.name
     FROM (
         SELECT
             q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
@@ -225,7 +225,7 @@ exports.createAnswer = function (answer, callback) {
 exports.getAnswersByQuestionId = function (id, callback) {
     const query = `
         SELECT 
-            a.*, u.username, u.name AS 'author', u.id AS 'accountId'
+            a.*, u.username, u.name, u.id AS 'accountId'
         FROM 
             answers a
         JOIN accounts u ON 
@@ -235,7 +235,7 @@ exports.getAnswersByQuestionId = function (id, callback) {
         ORDER BY createdAt
     `
     const values = [id]
-    db.get(query, values, function (error, question) {
+    db.all(query, values, function (error, question) {
         callback(error, question)
     })
 }
@@ -243,7 +243,7 @@ exports.getAnswersByQuestionId = function (id, callback) {
 exports.getAnswersByUserId = function (id, callback) {
     const query = `
         SELECT 
-            a.*, u.username, u.name AS 'author', u.id AS 'accountId'
+            a.*, u.username, u.name, u.id AS 'accountId'
         FROM 
             answers a
         JOIN accounts u ON 
@@ -253,7 +253,7 @@ exports.getAnswersByUserId = function (id, callback) {
         ORDER BY createdAt
     `
     const values = [id]
-    db.get(query, values, function (error, question) {
+    db.all(query, values, function (error, question) {
         callback(error, question)
     })
 }
