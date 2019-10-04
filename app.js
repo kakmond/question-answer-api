@@ -256,6 +256,7 @@ app.put("/questions/:id", function (req, res) {
     const id = req.params.id
     const title = req.body.title
     const description = req.body.description
+    const accountId = req.body.accountId
     let payload = null
 
     try {
@@ -277,7 +278,7 @@ app.put("/questions/:id", function (req, res) {
             if (!oldQuestion)
                 res.status(404).end()
             else {
-                if (payload == null || payload.accountId != oldQuestion.accountId) {
+                if (payload == null || payload.accountId != oldQuestion.accountId || payload.accountId != accountId) {
                     res.status(401).end()
                     return
                 }
@@ -291,7 +292,7 @@ app.put("/questions/:id", function (req, res) {
 
                 if (!description)
                     validationErrors.push("description is required")
-                if (description.length < DESCRIPTION_MIN_LENGTH)
+                else if (description.length < DESCRIPTION_MIN_LENGTH)
                     validationErrors.push("description is too short")
                 else if (description.length > DESCRIPTION_MAX_LENGTH)
                     validationErrors.push("description is too long")
@@ -325,16 +326,45 @@ app.put("/questions/:id", function (req, res) {
 
 app.delete("/questions/:id", function (req, res) {
     const id = req.params.id
-    db.deleteQuestionById(id, function (error, questionExisted) {
+    let payload = null
+
+    try {
+        const authorizationHeader = req.get("Authorization")
+        const accessToken = authorizationHeader.substr("Bearer ".length)
+        payload = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+    }
+    catch (e) {
+        res.status(401).end()
+        return
+    }
+
+    db.getQuestionById(id, function (error, oldQuestion) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
-        else
-            if (!questionExisted)
+        else {
+            if (!oldQuestion)
                 res.status(404).end()
-            else
-                res.status(204).end()
+            else {
+                if (payload == null || payload.accountId != oldQuestion.accountId) {
+                    res.status(401).end()
+                    return
+                }
+
+                db.deleteQuestionById(id, function (error, questionExisted) {
+                    if (error) {
+                        console.log(error)
+                        res.status(500).end()
+                    }
+                    else
+                        if (!questionExisted)
+                            res.status(404).end()
+                        else
+                            res.status(204).end()
+                })
+            }
+        }
     })
 })
 
@@ -404,21 +434,31 @@ app.get("/accounts/:id/answers", function (req, res) {
     })
 })
 
-// app.get("/answers/:id", function (req, res) {
-//     const id = req.params.id
-//     db.getAnswerById(id, function (error, answer) {
-//         if (error) {
-//             console.log(error)
-//             res.status(500).end()
-//         }
-//         else
-//             if (answer)
-//                 res.status(200).json(answer)
-//             else
-//                 res.status(404).end()
-//     })
-// })
+app.get("/answers", function (req, res) {
+    db.getAllAnswers(function (error, answers) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            res.status(200).json(answers)
+    })
+})
 
+app.get("/answers/:id", function (req, res) {
+    const id = req.params.id
+    db.getAnswerById(id, function (error, answer) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            if (answer)
+                res.status(200).json(answer)
+            else
+                res.status(404).end()
+    })
+})
 
 app.post("/answers", function (req, res) {
     const validationErrors = []
@@ -469,24 +509,118 @@ app.post("/answers", function (req, res) {
                 console.log(error)
                 res.status(500).end()
             }
-        else
+        else {
+            res.setHeader("Location", "/answers/" + id)
             res.status(201).end()
+        }
     })
 })
 
 app.delete("/answers/:id", function (req, res) {
     const id = req.params.id
-    db.deleteQuestionById(id, function (error, answerExisted) {
+    let payload = null
+
+    try {
+        const authorizationHeader = req.get("Authorization")
+        const accessToken = authorizationHeader.substr("Bearer ".length)
+        payload = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+    }
+    catch (e) {
+        res.status(401).end()
+        return
+    }
+
+    db.getAnswerById(id, function (error, oldAnswer) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
-        else
-            if (!answerExisted)
+        else {
+            if (!oldAnswer)
                 res.status(404).end()
-            else
-                res.status(204).end()
+            else {
+                if (payload == null || payload.accountId != oldAnswer.accountId) {
+                    res.status(401).end()
+                    return
+                }
+
+                db.deleteAnswerById(id, function (error, answerExisted) {
+                    if (error) {
+                        console.log(error)
+                        res.status(500).end()
+                    }
+                    else
+                        if (!answerExisted)
+                            res.status(404).end()
+                        else
+                            res.status(204).end()
+                })
+            }
+        }
     })
+})
+
+app.put("/answers/:id", function (req, res) {
+    const validationErrors = []
+    const id = req.params.id
+    const description = req.body.description
+    let payload = null
+
+    try {
+        const authorizationHeader = req.get("Authorization")
+        const accessToken = authorizationHeader.substr("Bearer ".length)
+        payload = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+    }
+    catch (e) {
+        res.status(401).end()
+        return
+    }
+
+    db.getAnswerById(id, function (error, oldAnswer) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else {
+            if (!oldAnswer)
+                res.status(404).end()
+            else {
+                if (payload == null || payload.accountId != oldAnswer.accountId) {
+                    res.status(401).end()
+                    return
+                }
+
+                if (!description)
+                    validationErrors.push("description is required")
+                else if (description.length < ANSWER_MIN_LENGTH)
+                    validationErrors.push("description is too short")
+                else if (description.length > ANSWER_MAX_LENGTH)
+                    validationErrors.push("description is too long")
+
+                if (validationErrors.length > 0) {
+                    res.status(400).json(validationErrors)
+                    return
+                }
+
+                const updateAnswer = {
+                    description,
+                }
+
+                db.updateAnswerById(id, updateAnswer, function (error, answerExisted) {
+                    if (error) {
+                        console.log(error)
+                        res.status(500).end()
+                    }
+                    else
+                        if (!answerExisted)
+                            res.status(404).end()
+                        else
+                            res.status(204).end()
+                })
+            }
+        }
+    })
+
 })
 
 app.listen(3000)

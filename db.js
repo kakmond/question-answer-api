@@ -37,7 +37,7 @@ db.run(`
 `)
 
 exports.getAllAccounts = function (callback) {
-    const query = `SELECT * FROM accounts ORDER BY id`
+    const query = `SELECT * FROM accounts ORDER BY id desc`
     const values = []
     db.all(query, values, function (error, accounts) {
         callback(error, accounts)
@@ -121,7 +121,7 @@ exports.getAllQuestions = function (callback) {
     ) x 
     LEFT JOIN
         accounts u ON u.id = x.accountId
-    ORDER BY x.createdAt
+    ORDER BY x.createdAt desc
     `
     const values = []
     db.all(query, values, function (error, questions) {
@@ -147,7 +147,7 @@ exports.getQuestionById = function (id, callback) {
         accounts u ON u.id = x.accountId
     WHERE 
         x.id = ?
-    ORDER BY x.createdAt
+    ORDER BY x.createdAt desc
     `
     const values = [id]
     db.get(query, values, function (error, question) {
@@ -232,7 +232,7 @@ exports.getAnswersByQuestionId = function (id, callback) {
             a.accountId = u.id
         WHERE 
             a.questionId = ?
-        ORDER BY createdAt
+        ORDER BY createdAt desc
     `
     const values = [id]
     db.all(query, values, function (error, question) {
@@ -250,7 +250,7 @@ exports.getAnswersByUserId = function (id, callback) {
             a.accountId = u.id
         WHERE 
             a.accountId = ?
-        ORDER BY createdAt
+        ORDER BY createdAt desc
     `
     const values = [id]
     db.all(query, values, function (error, question) {
@@ -261,6 +261,88 @@ exports.getAnswersByUserId = function (id, callback) {
 exports.deleteAnswerById = function (id, callback) {
     const query = `DELETE FROM answers WHERE id = ?`
     const values = [id]
+    db.run(query, values, function (error) {
+        const answerExisted = (this.changes == 1)
+        callback(error, answerExisted)
+    })
+}
+
+// exports.getAllAnswers = function (callback) {
+//     const query = `
+//     SELECT
+//         x.*, 
+//         q.description AS 'questionDescription',
+//         q.title AS 'questionTitle',
+//     FROM (
+//         SELECT 
+//             a.questionId,
+//             a.createdAt AS 'answerCreatedAt',
+//             a.id AS 'answerId', 
+//             a.description AS 'answerDescription',
+//             u.username AS 'answerUsername', 
+//             u.name AS 'answerName', 
+//             u.id AS 'answerAccountId'
+//         FROM 
+//             answers a
+//         JOIN accounts u ON 
+//             a.accountId = u.id
+//     ) x
+//     LEFT JOIN
+//         questions q ON q.id = x.questionId
+//     ORDER BY x.answerCreatedAt desc
+// `
+//     const values = []
+// db.all(query, values, function (error, answers) {
+//     callback(error, answers)
+// })
+// }
+
+exports.getAllAnswers = function (callback) {
+    const query = `
+    SELECT 
+        a.*, u.username, u.name, u.id AS 'accountId'
+    FROM 
+        answers a
+    JOIN accounts u ON 
+        a.accountId = u.id
+    ORDER BY createdAt desc
+`
+    const values = []
+    db.all(query, values, function (error, answers) {
+        callback(error, answers)
+    })
+}
+
+exports.getAnswerById = function (id, callback) {
+    const query = `
+    SELECT 
+        a.*, u.username, u.name, u.id AS 'accountId'
+    FROM 
+        answers a
+    JOIN accounts u ON 
+        a.accountId = u.id
+    WHERE 
+        a.id = ?
+    ORDER BY createdAt desc
+`
+    const values = [id]
+    db.get(query, values, function (error, answer) {
+        callback(error, answer)
+    })
+}
+
+exports.updateAnswerById = function (id, updatedAnswer, callback) {
+    const query = `
+		UPDATE answers SET
+            description = ?
+		WHERE
+			id = ?
+	`
+    const values = [
+        updatedAnswer.description,
+        id
+    ]
+
     db.run(query, values, function (error) {
         const answerExisted = (this.changes == 1)
         callback(error, answerExisted)
