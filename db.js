@@ -266,7 +266,7 @@ exports.getAnswersByQuestionId = function (id, callback) {
     })
 }
 
-exports.getAnswersByUserId = function (id, callback) {
+exports.getAnswersByAccountId = function (id, callback) {
     const query = `
         SELECT 
             a.*, u.username, u.name, u.id AS 'accountId'
@@ -274,10 +274,41 @@ exports.getAnswersByUserId = function (id, callback) {
             answers a
         JOIN accounts u ON 
             a.accountId = u.id
-        WHERE 
-            a.accountId = ?
+    WHERE 
+        a.accountId = ?
         ORDER BY createdAt desc
     `
+    // const query = `
+    // SELECT y.*, a2.name
+    // FROM (
+    // SELECT
+    //     x.*, 
+    //     q.description AS 'questionDescription',
+    //     q.title AS 'questionTitle',
+    //     q.accountId AS 'questionAccountId'
+    // FROM (
+    //     SELECT 
+    //         a.questionId,
+    //         a.createdAt AS 'answerCreatedAt',
+    //         a.id AS 'answerId', 
+    //         a.description AS 'answerDescription',
+    //         u.username AS 'answerUsername', 
+    //         u.name AS 'answerName', 
+    //         u.id AS 'answerAccountId'
+    //     FROM 
+    //         answers a
+    //     JOIN accounts u ON 
+    //         a.accountId = u.id
+    // ) x
+    // JOIN
+    //     questions q ON q.id = x.questionId
+    // WHERE 
+    //     answerAccountId = ?
+    // ) y
+    // JOIN
+    //     accounts a2 ON a2.id = y.questionAccountId
+    // ORDER BY y.answerCreatedAt desc
+    // `
     const values = [id]
     db.all(query, values, function (error, question) {
         callback(error, question)

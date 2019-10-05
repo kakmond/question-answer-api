@@ -424,7 +424,7 @@ app.get("/questions/:id/answers", function (req, res) {
 
 app.get("/accounts/:id/answers", function (req, res) {
     const id = req.params.id
-    db.getAnswersByUserId(id, function (error, account) {
+    db.getAnswersByAccountId(id, function (error, account) {
         if (error) {
             console.log(error)
             res.status(500).end()
