@@ -155,6 +155,32 @@ exports.getQuestionById = function (id, callback) {
     })
 }
 
+exports.getQuestionsByAccountId = function (id, callback) {
+    const query = `
+    SELECT
+        x.*, u.name
+    FROM (
+        SELECT
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+        FROM
+            questions q
+        LEFT JOIN 
+            answers a ON q.id = a.questionId
+        GROUP BY
+            q.id
+    ) x 
+    LEFT JOIN
+        accounts u ON u.id = x.accountId
+    WHERE 
+        x.accountId = ?
+    ORDER BY x.createdAt desc
+    `
+    const values = [id]
+    db.all(query, values, function (error, question) {
+        callback(error, question)
+    })
+}
+
 exports.createQuestion = function (question, callback) {
     const query = `
         INSERT INTO questions 

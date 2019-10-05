@@ -434,6 +434,18 @@ app.get("/accounts/:id/answers", function (req, res) {
     })
 })
 
+app.get("/accounts/:id/questions", function (req, res) {
+    const id = req.params.id
+    db.getQuestionsByAccountId(id, function (error, account) {
+        if (error) {
+            console.log(error)
+            res.status(500).end()
+        }
+        else
+            res.status(200).json(account)
+    })
+})
+
 app.get("/answers", function (req, res) {
     db.getAllAnswers(function (error, answers) {
         if (error) {
