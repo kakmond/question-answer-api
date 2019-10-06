@@ -119,32 +119,60 @@ app.put("/accounts/:id", function (req, res) {
     const validationErrors = []
     const id = req.params.id
     const name = req.body.name
+    let payload = null
 
-    if (!name)
-        validationErrors.push("name is required")
-    else if (name.length < NAME_MIN_LENGTH)
-        validationErrors.push("name is too short")
-    else if (name.length > NAME_MAX_LENGTH)
-        validationErrors.push("name is too long")
-
-    if (validationErrors.length > 0) {
-        res.status(400).json(validationErrors)
+    try {
+        const authorizationHeader = req.get("Authorization")
+        const accessToken = authorizationHeader.substr("Bearer ".length)
+        payload = jwt.verify(accessToken, ACCESS_TOKEN_SECRET)
+    }
+    catch (e) {
+        res.status(401).end()
         return
     }
 
-    const updatedAccount = {
-        name,
-    }
-    db.updateAccountById(id, updatedAccount, function (error, accountExisted) {
+    db.getAccountById(id, function (error, oldAccount) {
         if (error) {
             console.log(error)
             res.status(500).end()
         }
-        else
-            if (!accountExisted)
+        else {
+            if (!oldAccount)
                 res.status(404).end()
-            else
-                res.status(204).end()
+            else {
+                if (payload == null || payload.accountId != oldAccount.id) {
+                    res.status(401).end()
+                    return
+                }
+
+                if (!name)
+                    validationErrors.push("name is required")
+                else if (name.length < NAME_MIN_LENGTH)
+                    validationErrors.push("name is too short")
+                else if (name.length > NAME_MAX_LENGTH)
+                    validationErrors.push("name is too long")
+
+                if (validationErrors.length > 0) {
+                    res.status(400).json(validationErrors)
+                    return
+                }
+
+                const updatedAccount = {
+                    name,
+                }
+                db.updateAccountById(id, updatedAccount, function (error, accountExisted) {
+                    if (error) {
+                        console.log(error)
+                        res.status(500).end()
+                    }
+                    else
+                        if (!accountExisted)
+                            res.status(404).end()
+                        else
+                            res.status(204).end()
+                })
+            }
+        }
     })
 })
 
