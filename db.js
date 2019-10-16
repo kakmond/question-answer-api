@@ -108,7 +108,7 @@ exports.deleteAccountById = function (id, callback) {
 exports.getAllQuestions = function (callback) {
     const query = `
     SELECT
-        x.*, u.name
+        x.*, u.name, u.username
     FROM (
         SELECT
             q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
@@ -132,7 +132,7 @@ exports.getAllQuestions = function (callback) {
 exports.getQuestionById = function (id, callback) {
     const query = `
     SELECT
-        x.*, u.name
+        x.*, u.name, u.username
     FROM (
         SELECT
             q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
@@ -158,7 +158,7 @@ exports.getQuestionById = function (id, callback) {
 exports.getQuestionsByAccountId = function (id, callback) {
     const query = `
     SELECT
-        x.*, u.name
+        x.*, u.name, u.username
     FROM (
         SELECT
             q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
@@ -323,36 +323,6 @@ exports.deleteAnswerById = function (id, callback) {
         callback(error, answerExisted)
     })
 }
-
-// exports.getAllAnswers = function (callback) {
-//     const query = `
-//     SELECT
-//         x.*, 
-//         q.description AS 'questionDescription',
-//         q.title AS 'questionTitle',
-//     FROM (
-//         SELECT 
-//             a.questionId,
-//             a.createdAt AS 'answerCreatedAt',
-//             a.id AS 'answerId', 
-//             a.description AS 'answerDescription',
-//             u.username AS 'answerUsername', 
-//             u.name AS 'answerName', 
-//             u.id AS 'answerAccountId'
-//         FROM 
-//             answers a
-//         JOIN accounts u ON 
-//             a.accountId = u.id
-//     ) x
-//     LEFT JOIN
-//         questions q ON q.id = x.questionId
-//     ORDER BY x.answerCreatedAt desc
-// `
-//     const values = []
-// db.all(query, values, function (error, answers) {
-//     callback(error, answers)
-// })
-// }
 
 exports.getAllAnswers = function (callback) {
     const query = `
