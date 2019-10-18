@@ -12,7 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "easyxml": "^2.0.1",
     "express": "^4.17.1",
+    "express-xml-bodyparser": "^0.3.0",
     "jsonwebtoken": "^8.5.1",
     "nodemon": "^1.19.3",
     "sqlite3": "^4.1.0"
