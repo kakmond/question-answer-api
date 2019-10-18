@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 const db = require('./db')
 const accountsRouter = require('./routes/accounts')
 const questionsRouter = require('./routes/questions')
@@ -64,7 +65,7 @@ app.post("/tokens", function (req, res) {
             console.log(error)
             res.status(500).end()
         }
-        else if (!account || account.password != password)
+        else if (!account || !bcrypt.compareSync(password, account.password))
             res.status(400).json({ error: "invalid_client" })
         else {
             const accessToken = jwt.sign({

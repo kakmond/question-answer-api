@@ -1,7 +1,8 @@
 const express = require('express')
 const db = require('../db')
 const app = express.Router()
-
+const bcrypt = require('bcryptjs')
+const HASHING_ROUNDS = 8
 const NAME_MIN_LENGTH = 4
 const NAME_MAX_LENGTH = 20
 const USERNAME_MIN_LENGTH = 4
@@ -27,39 +28,34 @@ app.post("/", function (req, res) {
     const username = req.body.username
     const password = req.body.password
     const name = req.body.name
-
     if (!username)
         validationErrors.push("username is required")
     else if (username.length < USERNAME_MIN_LENGTH)
         validationErrors.push("username is too short")
     else if (username.length > USERNAME_MAX_LENGTH)
         validationErrors.push("username is too long")
-
     if (!password)
         validationErrors.push("password is required")
     else if (password.length < PASSWORD_MIN_LENGTH)
         validationErrors.push("password is too short")
     else if (password.length > PASSWORD_MAX_LENGTH)
         validationErrors.push("password is too Long")
-
     if (!name)
         validationErrors.push("name is required")
     else if (name.length < NAME_MIN_LENGTH)
         validationErrors.push("name is too short")
     else if (name.length > NAME_MAX_LENGTH)
         validationErrors.push("name is too long")
-
     if (validationErrors.length > 0) {
         res.status(400).json(validationErrors)
         return
     }
-
+    const hashPassward = bcrypt.hashSync(password, HASHING_ROUNDS)
     const account = {
         username,
-        password,
+        password: hashPassward,
         name
     }
-
     db.createAccount(account, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: UNIQUE constraint failed: accounts.username")
