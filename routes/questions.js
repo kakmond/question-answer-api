@@ -13,7 +13,7 @@ app.get("/", function (req, res) {
             console.log(error)
             res.status(500).end()
         } else
-            res.status(200).json(questions)
+            res.status(200).sendData(questions)
     })
 })
 
@@ -43,7 +43,7 @@ app.post("/", function (req, res) {
         validationErrors.push("description is too long")
 
     if (validationErrors.length > 0) {
-        res.status(400).json(validationErrors)
+        res.status(400).sendData(validationErrors)
         return
     }
 
@@ -57,7 +57,7 @@ app.post("/", function (req, res) {
     db.createQuestion(question, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")
-                res.status(400).json(["account doesn't exist"])
+                res.status(400).sendData(["account doesn't exist"])
             else {
                 console.log(error)
                 res.status(500).end()
@@ -78,7 +78,7 @@ app.get("/:id", function (req, res) {
         }
         else
             if (question)
-                res.status(200).json(question)
+                res.status(200).sendData(question)
             else
                 res.status(404).end()
     })
@@ -121,7 +121,7 @@ app.put("/:id", function (req, res) {
                     validationErrors.push("description is too long")
 
                 if (validationErrors.length > 0) {
-                    res.status(400).json(validationErrors)
+                    res.status(400).sendData(validationErrors)
                     return
                 }
 
@@ -188,7 +188,7 @@ app.get("/:id/answers", function (req, res) {
             res.status(500).end()
         }
         else
-            res.status(200).json(answer)
+            res.status(200).sendData(answer)
     })
 })
 

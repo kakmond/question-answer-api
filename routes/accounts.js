@@ -18,7 +18,7 @@ app.get("/", function (req, res) {
         }
         else {
             accounts.forEach(account => delete account.password)
-            res.status(200).json(accounts)
+            res.status(200).sendData(accounts)
         }
     })
 })
@@ -47,7 +47,7 @@ app.post("/", function (req, res) {
     else if (name.length > NAME_MAX_LENGTH)
         validationErrors.push("name is too long")
     if (validationErrors.length > 0) {
-        res.status(400).json(validationErrors)
+        res.status(400).sendData(validationErrors)
         return
     }
     const hashPassward = bcrypt.hashSync(password, HASHING_ROUNDS)
@@ -59,7 +59,7 @@ app.post("/", function (req, res) {
     db.createAccount(account, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: UNIQUE constraint failed: accounts.username")
-                res.status(400).json(["username is taken"])
+                res.status(400).sendData(["username is taken"])
             else {
                 console.log(error)
                 res.status(500).end()
@@ -81,7 +81,7 @@ app.get("/:id", function (req, res) {
         else
             if (account) {
                 delete account.password
-                res.status(200).json(account)
+                res.status(200).sendData(account)
             } else
                 res.status(404).end()
     })
@@ -115,7 +115,7 @@ app.put("/:id", function (req, res) {
                     validationErrors.push("name is too long")
 
                 if (validationErrors.length > 0) {
-                    res.status(400).json(validationErrors)
+                    res.status(400).sendData(validationErrors)
                     return
                 }
 
@@ -146,7 +146,7 @@ app.get("/:id/answers", function (req, res) {
             res.status(500).end()
         }
         else
-            res.status(200).json(account)
+            res.status(200).sendData(account)
     })
 })
 
@@ -158,7 +158,7 @@ app.get("/:id/questions", function (req, res) {
             res.status(500).end()
         }
         else
-            res.status(200).json(account)
+            res.status(200).sendData(account)
     })
 })
 
