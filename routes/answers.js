@@ -22,6 +22,11 @@ app.post("/", function (req, res) {
     const description = req.body.description
     const accountId = req.accountId
 
+    if (accountId == null) {
+        res.status(401).end()
+        return
+    }
+
     if (!description)
         validationErrors.push("description is required")
     else if (description.length < ANSWER_MIN_LENGTH)
