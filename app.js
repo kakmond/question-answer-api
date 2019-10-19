@@ -38,10 +38,7 @@ app.use(function (req, res, next) {
         const authorizationHeader = req.get("Authorization")
         const accessToken = authorizationHeader.substr("Bearer ".length)
         jwt.verify(accessToken, ACCESS_TOKEN_SECRET, function (error, payload) {
-            if (error)
-                console.log(error)
-            else
-                req.accountId = payload.accountId
+            req.accountId = payload.accountId
             next()
         })
     } catch (error) {
