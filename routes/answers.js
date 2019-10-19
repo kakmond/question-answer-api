@@ -1,7 +1,6 @@
-const express = require('express')
-const db = require('../db')
+const express = require("express")
+const db = require("../db")
 const app = express.Router()
-
 const ANSWER_MIN_LENGTH = 5
 const ANSWER_MAX_LENGTH = 100
 
@@ -21,31 +20,26 @@ app.post("/", function (req, res) {
     const questionId = req.body.questionId
     const description = req.body.description
     const accountId = req.accountId
-
     if (accountId == null) {
         res.status(401).end()
         return
     }
-
     if (!description)
         validationErrors.push("description is required")
     else if (description.length < ANSWER_MIN_LENGTH)
         validationErrors.push("description is too short")
     else if (description.length > ANSWER_MAX_LENGTH)
         validationErrors.push("description is too long")
-
     if (validationErrors.length > 0) {
         res.status(400).sendData(validationErrors)
         return
     }
-
     const answer = {
         accountId,
         questionId,
         description,
         createdAt: new Date().getTime()
     }
-
     db.createAnswer(answer, function (error, id) {
         if (error)
             if (error.message == "SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")
@@ -64,7 +58,6 @@ app.post("/", function (req, res) {
 app.delete("/:id", function (req, res) {
     const id = req.params.id
     const accountId = req.accountId
-
     db.getAnswerById(id, function (error, oldAnswer) {
         if (error) {
             console.log(error)
@@ -78,7 +71,6 @@ app.delete("/:id", function (req, res) {
                     res.status(401).end()
                     return
                 }
-
                 db.deleteAnswerById(id, function (error, answerExisted) {
                     if (error) {
                         console.log(error)
@@ -115,7 +107,6 @@ app.put("/:id", function (req, res) {
     const id = req.params.id
     const description = req.body.description
     const accountId = req.accountId
-
     db.getAnswerById(id, function (error, oldAnswer) {
         if (error) {
             console.log(error)
@@ -129,23 +120,19 @@ app.put("/:id", function (req, res) {
                     res.status(401).end()
                     return
                 }
-
                 if (!description)
                     validationErrors.push("description is required")
                 else if (description.length < ANSWER_MIN_LENGTH)
                     validationErrors.push("description is too short")
                 else if (description.length > ANSWER_MAX_LENGTH)
                     validationErrors.push("description is too long")
-
                 if (validationErrors.length > 0) {
                     res.status(400).sendData(validationErrors)
                     return
                 }
-
                 const updateAnswer = {
                     description,
                 }
-
                 db.updateAnswerById(id, updateAnswer, function (error, answerExisted) {
                     if (error) {
                         console.log(error)
@@ -160,7 +147,6 @@ app.put("/:id", function (req, res) {
             }
         }
     })
-
 })
 
 module.exports = app

@@ -1,18 +1,18 @@
-const express = require('express')
+const express = require("express")
 const app = express()
-const bodyParser = require('body-parser')
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
-const db = require('./db')
-const accountsRouter = require('./routes/accounts')
-const questionsRouter = require('./routes/questions')
-const answersRouter = require('./routes/answers')
-const xmlparser = require('express-xml-bodyparser');
-const easyxml = require('easyxml');
+const bodyParser = require("body-parser")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs")
+const db = require("./db")
+const accountsRouter = require("./routes/accounts")
+const questionsRouter = require("./routes/questions")
+const answersRouter = require("./routes/answers")
+const xmlparser = require("express-xml-bodyparser");
+const easyxml = require("easyxml");
 const serializer = new easyxml({
     singularize: true,
-    rootElement: 'response',
-    dateFormat: 'ISO',
+    rootElement: "response",
+    dateFormat: "ISO",
     manifest: true
 });
 const ACCESS_TOKEN_SECRET = "eieiza"
@@ -48,16 +48,16 @@ app.use(function (req, res, next) {
 
 app.use(function (req, res, next) {
     res.sendData = function (obj) {
-        if (req.accepts('application/json')) {
-            res.header('Content-Type', 'application/json');
+        if (req.accepts("application/json")) {
+            res.header("Content-Type", "application/json");
             res.send(obj);
-        } else if (req.accepts('application/xml')) {
-            res.header('Content-Type', 'application/xml');
+        } else if (req.accepts("application/xml")) {
+            res.header("Content-Type", "application/xml");
             const xml = serializer.render(obj);
             res.send(xml);
         } else {
             // Send back the resource in JSON default format.
-            res.header('Content-Type', 'application/json');
+            res.header("Content-Type", "application/json");
             res.send(obj);
         }
     };
@@ -72,17 +72,14 @@ app.post("/tokens", function (req, res) {
     const grant_type = req.body.grant_type
     const username = req.body.username
     const password = req.body.password
-
     if (!grant_type || !username || !password) {
         res.status(400).sendData({ error: "invalid_request" })
         return
     }
-
     if (grant_type != "password") {
         res.status(400).sendData({ error: "unsupported_grant_type" })
         return
     }
-
     db.getAccountByUsername(username, function (error, account) {
         if (error) {
             console.log(error)

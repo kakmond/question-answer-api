@@ -1,7 +1,7 @@
-const express = require('express')
-const db = require('../db')
+const express = require("express")
+const db = require("../db")
 const app = express.Router()
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs")
 const HASHING_ROUNDS = 8
 const NAME_MIN_LENGTH = 4
 const NAME_MAX_LENGTH = 20
@@ -92,7 +92,6 @@ app.put("/:id", function (req, res) {
     const id = req.params.id
     const name = req.body.name
     const accountId = req.accountId
-
     db.getAccountById(id, function (error, oldAccount) {
         if (error) {
             console.log(error)
@@ -106,7 +105,6 @@ app.put("/:id", function (req, res) {
                     res.status(401).end()
                     return
                 }
-
                 if (!name)
                     validationErrors.push("name is required")
                 else if (name.length < NAME_MIN_LENGTH)
@@ -118,7 +116,6 @@ app.put("/:id", function (req, res) {
                     res.status(400).sendData(validationErrors)
                     return
                 }
-
                 const updatedAccount = {
                     name,
                 }

@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3')
+const sqlite3 = require("sqlite3")
 const db = new sqlite3.Database("database.db")
 
 db.run("PRAGMA foreign_keys = ON")
@@ -72,7 +72,6 @@ exports.createAccount = function (account, callback) {
         account.password,
         account.name,
     ]
-
     db.run(query, values, function (error) {
         const id = this.lastID
         callback(error, id)
@@ -111,7 +110,7 @@ exports.getAllQuestions = function (callback) {
         x.*, u.name, u.username
     FROM (
         SELECT
-            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS "answerCount"
         FROM
             questions q
         LEFT JOIN 
@@ -135,7 +134,7 @@ exports.getQuestionById = function (id, callback) {
         x.*, u.name, u.username
     FROM (
         SELECT
-            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS "answerCount"
         FROM
             questions q
         LEFT JOIN 
@@ -161,7 +160,7 @@ exports.getQuestionsByAccountId = function (id, callback) {
         x.*, u.name, u.username
     FROM (
         SELECT
-            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS 'answerCount'
+            q.id , q.title, q.createdAt, q.description, q.accountId, COUNT(a.id) AS "answerCount"
         FROM
             questions q
         LEFT JOIN 
@@ -213,7 +212,6 @@ exports.updateQuestionById = function (id, updatedquestion, callback) {
         updatedquestion.description,
         id
     ]
-
     db.run(query, values, function (error) {
         const questionExisted = (this.changes == 1)
         callback(error, questionExisted)
@@ -251,7 +249,7 @@ exports.createAnswer = function (answer, callback) {
 exports.getAnswersByQuestionId = function (id, callback) {
     const query = `
         SELECT 
-            a.*, u.username, u.name, u.id AS 'accountId'
+            a.*, u.username, u.name, u.id AS "accountId"
         FROM 
             answers a
         JOIN accounts u ON 
@@ -269,7 +267,7 @@ exports.getAnswersByQuestionId = function (id, callback) {
 exports.getAnswersByAccountId = function (id, callback) {
     const query = `
         SELECT 
-            a.*, u.username, u.name, u.id AS 'accountId'
+            a.*, u.username, u.name, u.id AS "accountId"
         FROM 
             answers a
         JOIN accounts u ON 
@@ -278,37 +276,6 @@ exports.getAnswersByAccountId = function (id, callback) {
         a.accountId = ?
         ORDER BY createdAt desc
     `
-    // const query = `
-    // SELECT y.*, a2.name
-    // FROM (
-    // SELECT
-    //     x.*, 
-    //     q.description AS 'questionDescription',
-    //     q.title AS 'questionTitle',
-    //     q.accountId AS 'questionAccountId'
-    // FROM (
-    //     SELECT 
-    //         a.questionId,
-    //         a.createdAt AS 'answerCreatedAt',
-    //         a.id AS 'answerId', 
-    //         a.description AS 'answerDescription',
-    //         u.username AS 'answerUsername', 
-    //         u.name AS 'answerName', 
-    //         u.id AS 'answerAccountId'
-    //     FROM 
-    //         answers a
-    //     JOIN accounts u ON 
-    //         a.accountId = u.id
-    // ) x
-    // JOIN
-    //     questions q ON q.id = x.questionId
-    // WHERE 
-    //     answerAccountId = ?
-    // ) y
-    // JOIN
-    //     accounts a2 ON a2.id = y.questionAccountId
-    // ORDER BY y.answerCreatedAt desc
-    // `
     const values = [id]
     db.all(query, values, function (error, question) {
         callback(error, question)
@@ -327,13 +294,13 @@ exports.deleteAnswerById = function (id, callback) {
 exports.getAllAnswers = function (callback) {
     const query = `
     SELECT 
-        a.*, u.username, u.name, u.id AS 'accountId'
+        a.*, u.username, u.name, u.id AS "accountId"
     FROM 
         answers a
     JOIN accounts u ON 
         a.accountId = u.id
     ORDER BY createdAt desc
-`
+    `
     const values = []
     db.all(query, values, function (error, answers) {
         callback(error, answers)
@@ -343,7 +310,7 @@ exports.getAllAnswers = function (callback) {
 exports.getAnswerById = function (id, callback) {
     const query = `
     SELECT 
-        a.*, u.username, u.name, u.id AS 'accountId'
+        a.*, u.username, u.name, u.id AS "accountId"
     FROM 
         answers a
     JOIN accounts u ON 
@@ -351,7 +318,7 @@ exports.getAnswerById = function (id, callback) {
     WHERE 
         a.id = ?
     ORDER BY createdAt desc
-`
+    `
     const values = [id]
     db.get(query, values, function (error, answer) {
         callback(error, answer)
@@ -369,7 +336,6 @@ exports.updateAnswerById = function (id, updatedAnswer, callback) {
         updatedAnswer.description,
         id
     ]
-
     db.run(query, values, function (error) {
         const answerExisted = (this.changes == 1)
         callback(error, answerExisted)
